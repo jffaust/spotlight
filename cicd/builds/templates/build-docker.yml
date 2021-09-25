@@ -1,0 +1,54 @@
+parameters:
+- name: DockerfilePath
+  displayName: "Path to the Dockerfile"
+  type: string
+
+- name: BuildContext
+  displayName: "Path for the Docker build context"
+  type: string
+
+- name: ContainerRegistry
+  displayName: "Name of the service connection for the container registry"
+  type: string
+
+- name: ContainerRepository
+  displayName: "Name of the repository in the specified registry"
+  type: string
+
+steps:
+- powershell: |
+    $containerVersion = 'fixme'
+    $branchName = '$(build.sourceBranch)' -replace 'refs/heads/', '' -replace '/', '-'
+    if ('$(build.sourceBranch)' -eq 'refs/heads/master') {
+      $containerVersion = "release-$(build.buildId)"
+    } else {
+      $containerVersion = "dev-$branchName"
+    }
+    echo "Build id: $(build.buildId)"
+    echo "Branch name: $branchName"
+    echo "App version: $containerVersion"
+    echo "##vso[task.setvariable variable=containerVersion]$containerVersion"
+    echo $containerVersion > "container-version.txt"
+  displayName: "Set Container Version"
+
+- task: Docker@2
+  displayName: Login to Container Registry
+  inputs:
+    command: login
+    containerRegistry: $(ContainerRegistry)
+
+- task: Docker@2
+  displayName: "Build and Push Image ($(containerVersion))"
+  inputs:
+    command: buildAndPush
+    Dockerfile: "$(DockerfilePath)"
+    buildContext: "$(BuildContext)"
+    repository: $(ContainerRepository)
+    tags: |
+      $(containerVersion)
+
+- task: PublishPipelineArtifact@1
+  displayName: "publish version file"
+  inputs:
+    targetPath: "container-version.txt"
+    artifactName: "version"

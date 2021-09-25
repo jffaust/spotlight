@@ -1,0 +1,20 @@
+# TODO: Relies on kube-prometheus-stack monitoring so should have a toggle for it
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: kps-spotlight
+  namespace: spotlight
+  labels:
+    app: spotlight
+    monitoring-stack: kps
+spec:
+  endpoints:
+    - port: server
+      interval: 30s
+      path: /metrics
+  namespaceSelector:
+    matchNames:
+      - spotlight
+  selector:
+    matchLabels:
+      app: spotlight

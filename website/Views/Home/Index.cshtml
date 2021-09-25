@@ -1,0 +1,9 @@
+@using Microsoft.Extensions.Configuration
+
+@inject IConfiguration Configuration
+
+<div id="react-app">Loading...</div>
+
+@section scripts {
+    <script src="~/dist/main-client.js" asp-append-version="true"></script>
+}

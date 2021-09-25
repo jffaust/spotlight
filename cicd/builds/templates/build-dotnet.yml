@@ -1,0 +1,50 @@
+parameters:
+- name: BuildTarget
+  displayName: 'Path to the csproj or solution to build'
+  type: string
+
+- name: BuildConfiguration
+  displayName: 'Debug or Release'
+  type: string
+
+# Variables can't be defined in a step template so we'll use a parameter with a default value
+- name: PublishFolder
+  type: string
+  default: '$(Build.ArtifactStagingDirectory)\publish'
+
+steps:
+- task: DotNetCoreCLI@2
+  displayName: 'dotnet restore'
+  inputs:
+    command: 'restore'
+    projects: '${{ parameters.BuildTarget }}'
+    verbosityRestore: 'minimal'
+
+- task: DotNetCoreCLI@2
+  displayName: 'dotnet build'
+  inputs:
+    command: 'build'
+    projects: '${{ parameters.BuildTarget }}'
+    arguments: '--no-restore --configuration ${{ parameters.BuildConfiguration }}'
+
+# Populates the $(BuildVersion) variable
+- task: PowerShell@2
+  displayName: 'Extract build version'
+  inputs:
+    targetType: 'filePath'
+    filePath: 'cicd/scripts/ExtractBuildVersion.ps1'
+
+- task: DotNetCoreCLI@2
+  displayName: 'dotnet publish'
+  inputs:
+    command: 'publish'
+    publishWebProjects: false
+    projects: '${{ parameters.BuildTarget }}'
+    arguments: '--no-restore --configuration ${{ parameters.BuildConfiguration }} --output ${{ parameters.PublishFolder }} /p:Version=$(BuildVersion)'
+    zipAfterPublish: true
+
+- task: PublishBuildArtifacts@1
+  displayName: 'Publish Artifact'
+  inputs:
+    PathtoPublish: '${{ parameters.PublishFolder }}'
+    ArtifactName: Drop

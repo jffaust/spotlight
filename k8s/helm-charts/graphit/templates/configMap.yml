@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: app-settings
+  namespace: spotlight
+data:
+  GRAPHIT_DEFAULT_NODE_COLOR: "#3BB9EB"

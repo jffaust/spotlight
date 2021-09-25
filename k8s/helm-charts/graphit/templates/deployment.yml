@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: k8sspotlight
+  namespace: spotlight
+  labels:
+    app: spotlight
+    tier: frontend
+spec:
+  replicas: 1
+  minReadySeconds: 10
+  selector:
+    matchLabels:
+      app: spotlight
+      tier: frontend
+  template:
+    metadata:
+      labels:
+        app: spotlight
+        tier: frontend
+    spec:
+      containers:
+        - name: k8sspotlight
+          image: spotlightviz/spotlight:{{.Values.WebsiteImageTag}}
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 80
+          resources:
+            limits:
+              memory: "128Mi" #128 MB
+              cpu: "100m" #100 milicpu (.1 cpu or 10% of the cpu)
+          livenessProbe:
+            httpGet:
+              path: /probe/health
+              port: 80
+            initialDelaySeconds: 60
+            periodSeconds: 30
+          envFrom:
+            - configMapRef:
+                name: app-settings

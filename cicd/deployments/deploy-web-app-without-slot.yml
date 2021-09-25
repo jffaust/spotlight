@@ -1,0 +1,48 @@
+name: $(Build.DefinitionName)-$(Year:yyyy).$(Month).$(DayOfMonth)$(Rev:.r)
+
+# Generic deployment pipeline for a webapp
+
+#variables:
+  #AzureDevOpsProjectId: set via terraform in Azure DevOps
+  #BuildPipelineId: set via terraform in Azure DevOps
+  #AppEnvironment: set via terraform in Azure DevOps
+  #WebApp: set via terraform in Azure DevOps
+  #ResourceGroup: set via terraform in Azure DevOps
+  #AzureSubscriptionConnection:  set via Terraform in Azure DevOps. Should be the name of the service connection to the subscription
+
+trigger: none
+pr: none
+
+stages:
+  - stage: Deploy
+    jobs:
+    - deployment: Deploy
+      displayName: Deploy App
+      pool:
+        vmImage: 'vs2017-win2016'
+      environment: '$(AppEnvironment)'
+      strategy:
+        runOnce:
+          deploy:
+            steps:
+            - task: DownloadBuildArtifacts@0
+              inputs:
+                buildType: 'specific'
+                project: '$(AzureDevOpsProjectId)'
+                pipeline: '$(BuildPipelineId)'
+                buildVersionToDownload: 'specific'
+                buildId: '$(buildId)' # Expected to be passed at queue time either manually or via a script (azdeploy)
+                downloadType: 'specific'
+                #downloadPath: '$(System.ArtifactsDirectory)'  #default value when not specified
+
+            - task: AzureRmWebAppDeployment@4
+              displayName: 'Deploy And Remove Old Files'
+              inputs:
+                azureSubscription: '$(AzureSubscriptionConnection)'
+                WebAppName: '$(WebApp)'
+                ResourceGroupName: '$(ResourceGroup)'
+                Package: '$(System.ArtifactsDirectory)/**/*.zip'
+                enableCustomDeployment: true
+                RemoveAdditionalFilesFlag: true
+                JSONFiles: '**/appsettings.json'
+

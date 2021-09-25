@@ -1,0 +1,49 @@
+name: $(Build.DefinitionName)-$(Year:yyyy).$(Month).$(DayOfMonth)$(Rev:.r)
+
+# Generic deployment pipeline for a webapp
+
+#variables:
+  #AzureDevOpsProjectId: set via terraform in Azure DevOps
+  #BuildPipelineId: set via terraform in Azure DevOps
+  #AppEnvironment: set via terraform in Azure DevOps
+  #WebApp: set via terraform in Azure DevOps
+  #ResourceGroup: set via terraform in Azure DevOps
+  #AzureSubscriptionConnection:  set via Terraform in Azure DevOps. Should be the name of the service connection to the subscription
+
+trigger: none
+pr: none
+
+stages:
+  - stage: Deploy
+    jobs:
+    - deployment: Deploy
+      displayName: Deploy App
+      pool:
+        vmImage: 'vs2017-win2016'
+      environment: '$(AppEnvironment)'
+      strategy:
+        runOnce:
+          deploy:
+            steps:
+            - task: DownloadPipelineArtifact@2
+              inputs:
+                source: 'specific'
+                artifact: 'version'
+                path: $(Build.SourcesDirectory)/artifacts
+                project: '$(AzureDevOpsProjectId)'
+                pipeline: $(BuildPipelineId)
+                runVersion: 'specific'
+                runId: '$(buildId)'
+
+            - powershell: |
+                $filepath = "$($ENV:Build_SourcesDirectory)/artifacts/container-version.txt"
+                $containerVersion = Get-Content $filepath
+                echo "##vso[task.setvariable variable=DockerImageTag]$containerVersion"
+              displayName: "Get Container Version"    
+  
+            - task: AzureWebAppContainer@1
+              inputs:
+                azureSubscription: $(AzureSubscriptionConnection)
+                appName: $(WebApp)
+                containers: $(DockerRegistry)/$(DockerRepository):$(DockerImageTag)
+

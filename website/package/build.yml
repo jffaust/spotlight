@@ -1,0 +1,39 @@
+name: $(Build.DefinitionName)-$(Year:yyyy).$(Month).$(DayOfMonth)$(Rev:.r)
+
+variables:
+  DockerfilePath: "$(Build.SourcesDirectory)/website/package/Dockerfile"
+  BuildContext: "$(Build.SourcesDirectory)/website"
+  ContainerRegistry: "SpotlightDockerHub"
+  ContainerRepository: "spotlightviz/spotlight"
+
+pool:
+  vmImage: ubuntu-18.04
+
+trigger:
+  branches:
+    include:
+      - main
+      - bugfix/*
+      - feature/*
+  paths:
+    include:
+      - website/*
+
+pr:
+  branches:
+    include:
+      - main
+      - bugfix/*
+      - feature/*
+  paths:
+    include:
+      - website/*
+
+steps:
+  # Build pipelines should use templates when possible to minimize duplication
+  - template: "../../cicd/builds/templates/build-docker.yml"
+    parameters:
+      DockerfilePath: "$(DockerfilePath)"
+      BuildContext: "$(BuildContext)"
+      ContainerRegistry: "$(ContainerRegistry)"
+      ContainerRepository: "$(ContainerRepository)"
