@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { withRouter } from "react-router";
 import { RouteComponentProps } from 'react-router-dom';
-import * as LatticeHelper from "../helpers/Lattice";
+import * as DemoGraphs from "../helpers/DemoGraphs";
 import { Graph } from '../types/Graph';
 import * as Force from '../types/Force';
 import { SettingsGroup } from './SettingsGroup';
@@ -88,7 +88,8 @@ function GraphExplorer(props: GraphExplorerProps) {
     const allowedPathRegex = new RegExp(allowedPathRegexString);
 
 
-    const defaultGraph = LatticeHelper.generateGraph(10,5);
+    //const defaultGraph = DemoGraphs.generateLatticeGraph(10,5);
+    const defaultGraph = DemoGraphs.generateCollatzConjectureGraph(16);
 
     const initState: State = {
         graphData: defaultGraph,

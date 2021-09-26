@@ -57,7 +57,7 @@ class App extends React.Component<PropsType, AppState> {
     return (
       <div>
         <div id="app-logo">
-          <span id="app-logo-graph">Graph</span><span id="app-logo-it">it</span>          
+          <span id="app-logo-graph">Spot</span><span id="app-logo-it">light</span>          
         </div>
         <Switch>
           <Route path="/" render={(props) => (
