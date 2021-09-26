@@ -89,7 +89,7 @@ function GraphExplorer(props: GraphExplorerProps) {
 
 
     //const defaultGraph = DemoGraphs.generateLatticeGraph(10,5);
-    const defaultGraph = DemoGraphs.generateCollatzConjectureGraph(16);
+    const defaultGraph = DemoGraphs.generateCollatzConjectureGraph(100);
 
     const initState: State = {
         graphData: defaultGraph,
@@ -102,7 +102,7 @@ function GraphExplorer(props: GraphExplorerProps) {
         linkSettings: {
             length: 75,
             labelProperty: "none",
-            showArrowheads: false
+            showArrowheads: true
         },
         nodeSettings: {
             labelProperty: "none",

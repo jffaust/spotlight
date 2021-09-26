@@ -47,15 +47,19 @@ export function generateLatticeGraph(w: number, h: number): Graph {
       return graph;
     }
 
-    let hashtable = {};
-
+    let hashtable: {[key: string]: boolean} = {};
     for (let i = start; i > 1; i--) {
-      if (Object.prototype.hasOwnProperty.call(hashtable, `${current}`)) {}
+      
+      let current = i;
+      if (!Object.prototype.hasOwnProperty.call(hashtable, `${current}`)) {
+        hashtable[`${current}`] = true;
+        graph.nodes.push({ id: `${current}`, parity: getParity(start)});
+      }
+      
+      while(current != 1) {
 
-      while(current != 1)
-      {
         let previous = current;
-        const parity = current % 2 == 0 ? "Even" : "Odd";
+        const parity = getParity(current);
 
         if (parity == "Odd") {
           current = 3*current + 1;
@@ -63,11 +67,24 @@ export function generateLatticeGraph(w: number, h: number): Graph {
           current = current / 2;
         }
 
-        hashtable[`${current}`] = true;
-        graph.nodes.push({ id: `${current}`, parity: parity});
-        graph.links.push({ source: `${previous}`, target: `${current}`, label: "next" });
+        let linkKey = `${previous}->${current}`;
+        if (!Object.prototype.hasOwnProperty.call(hashtable, linkKey)) {
+          hashtable[linkKey] = true;
+          graph.links.push({ source: `${previous}`, target: `${current}`, label: "next" });  
+        }
+
+        if (!Object.prototype.hasOwnProperty.call(hashtable, `${current}`)) {
+          hashtable[`${current}`] = true;
+          graph.nodes.push({ id: `${current}`, parity: getParity(current)});
+        } else {
+          break;
+        }
       }
     }
 
     return graph;
+  }
+
+  function getParity(n: number): string {
+    return n % 2 == 0 ? "Even" : "Odd";
   }
