@@ -15,7 +15,7 @@ export default function Dropdown(props: DropdownProps) {
     return <div className="custom-select">
                 <select value={props.value} onChange={handleOnChange}>
                     {props.options.map(o => (
-                        <option value={o}>{o}</option>
+                        <option key={o} value={o}>{o}</option>
                     ))}
                 </select>
                 <span className="focus"></span>
