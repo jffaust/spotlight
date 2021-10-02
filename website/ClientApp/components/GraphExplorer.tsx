@@ -89,7 +89,7 @@ function GraphExplorer(props: GraphExplorerProps) {
 
 
     //const defaultGraph = DemoGraphs.generateLatticeGraph(10,5);
-    const defaultGraph = DemoGraphs.generateCollatzConjectureGraph(100);
+    const defaultGraph = DemoGraphs.generateCollatzConjectureGraph(4);
 
     const initState: State = {
         graphData: defaultGraph,

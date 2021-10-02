@@ -28,6 +28,7 @@ export default function D3Graph(props: D3GraphProps) {
     const [state, setState] = useState(initState);
     const prevProps = usePrevious(props);
     const prevState = usePrevious(state);
+    const dragBehavior = d3.drag<SVGCircleElement, any>().on("drag", dragNode);
 
     function selectSVG() {
         return d3.select<Element, any>(`svg#svg-${props.id}`);
@@ -42,7 +43,7 @@ export default function D3Graph(props: D3GraphProps) {
     let d3NodeLabels: d3.Selection<SVGTextElement, any, d3.BaseType, any> = selectGraph().selectAll("text.nl");
     let d3Links: d3.Selection<SVGLineElement, any, d3.BaseType, any> = selectGraph().selectAll("line");
     let d3LinkLabels: d3.Selection<SVGTextElement, any, d3.BaseType, any> = selectGraph().selectAll("text.ll");
-
+    
 
     useEffect(() => {
         if (!prevProps || (props.graphData.timestamp != prevProps.graphData.timestamp)) {
@@ -66,6 +67,8 @@ export default function D3Graph(props: D3GraphProps) {
             } 
             
             if (prevState?.colorMapping != state.colorMapping) {
+                ForceSimulation.on("tick", graphTick);
+                d3Nodes.call(dragBehavior);
                 updateNodeElements();
             }
 
@@ -146,11 +149,6 @@ export default function D3Graph(props: D3GraphProps) {
                 .attr("x2", function (l: any) { return l.target.x; })
                 .attr("y2", function (l: any) { return l.target.y; });
 
-            var dragBehavior = d3.drag<SVGCircleElement, any>()
-                //.on("dragstart", dragstart)
-                .on("drag", (d, i) => dragNode(d, i));
-                //.on("dragend", dragend);
-
             d3Nodes = graph.selectAll("circle")
                 .data(props.graphData.nodes)
                 .enter()
@@ -181,7 +179,7 @@ export default function D3Graph(props: D3GraphProps) {
                 .data(props.graphData.links)
                 .enter()
                 .append("text")
-                .attr("class", "ll") //ll = node label
+                .attr("class", "ll") //ll = link label
                 .style("fill", "none")
                 .attr("x", function (l: any) { return (l.source.x + l.target.x) / 2; })
                 .attr("y", function (l: any) { return (l.source.y + l.target.y) / 2; });
@@ -189,8 +187,8 @@ export default function D3Graph(props: D3GraphProps) {
     }
 
     function dragNode(d: any, i: any) {
-        d.px += d3.event.dx;
-        d.py += d3.event.dy;
+        //d.px += d3.event.dx;
+        //d.py += d3.event.dy;
         d.x += d3.event.dx;
         d.y += d3.event.dy; 
         graphTick();
