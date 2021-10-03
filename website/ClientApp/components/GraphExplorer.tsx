@@ -88,44 +88,53 @@ function GraphExplorer(props: GraphExplorerProps) {
     const allowedPathRegex = new RegExp(allowedPathRegexString);
 
 
-    //const defaultGraph = DemoGraphs.generateLatticeGraph(10,5);
-    const defaultGraph = DemoGraphs.generateCollatzConjectureGraph(4);
+    function initState(): State {
+        const max = 2;
+        const random = Math.floor(Math.random() * (max + 1));
 
-    const initState: State = {
-        graphData: defaultGraph,
-        graphDataInput: JSON.stringify({nodes: defaultGraph.nodes, links: defaultGraph.links}, null, 2),
-        showUploadGraphDataModal: false,
-        showSaveGraphModal: false,
-        showOpenGraphModal: false,
-        showSettingsMenu: false,
-        showAdvancedMenu: false,
-        linkSettings: {
-            length: 75,
-            labelProperty: "none",
-            showArrowheads: true
-        },
-        nodeSettings: {
-            labelProperty: "none",
-            colorProperty: "default"
-        },
-        searchSettings: {
-            searchString: "",
-            isActive: false,
-            useRegex: false
-        },
-        forceCenter: new Force.Center(0.5, 0.5),
-        forceCharge: new Force.Charge(false, -30, 1, 100),
-        forceCollide: new Force.Collide(true, 5, 5, 50),
-        forceX: new Force.Position(false, 0, 5),
-        forceY: new Force.Position(false, 0, 5),
-        forceRadial: new Force.Radial(false, 0, 0, 50, 5),
-        storageContext: {
-            files: [],
-            folderChain: [{ id: '#INTERNAL_ROOT', name: 'Datasets', isDir: true }]
-        },
-        saveDatasetAsPath: "",
-        saveDatasetAsPathIsValid: false
-    };   
+        let defaultGraph = DemoGraphs.generateGridGraph(10,5);
+        if (random == 1) {
+            defaultGraph = DemoGraphs.generateCollatzConjectureGraph(20);
+        } else if (random == 2) {
+            defaultGraph = DemoGraphs.generateCollatzConjectureGraph(4);
+        } 
+
+        return {
+            graphData: defaultGraph,
+            graphDataInput: JSON.stringify({nodes: defaultGraph.nodes, links: defaultGraph.links}, null, 2),
+            showUploadGraphDataModal: false,
+            showSaveGraphModal: false,
+            showOpenGraphModal: false,
+            showSettingsMenu: false,
+            showAdvancedMenu: false,
+            linkSettings: {
+                length: 75,
+                labelProperty: "none",
+                showArrowheads: true
+            },
+            nodeSettings: {
+                labelProperty: "none",
+                colorProperty: "default"
+            },
+            searchSettings: {
+                searchString: "",
+                isActive: false,
+                useRegex: false
+            },
+            forceCenter: new Force.Center(0.5, 0.5),
+            forceCharge: new Force.Charge(false, -30, 1, 100),
+            forceCollide: new Force.Collide(true, 5, 5, 50),
+            forceX: new Force.Position(false, 0, 5),
+            forceY: new Force.Position(false, 0, 5),
+            forceRadial: new Force.Radial(false, 0, 0, 50, 5),
+            storageContext: {
+                files: [],
+                folderChain: [{ id: '#INTERNAL_ROOT', name: 'Datasets', isDir: true }]
+            },
+            saveDatasetAsPath: "",
+            saveDatasetAsPathIsValid: false
+        };   
+    }
 
     const [state, setState] = useState(initState);
     const prevProps = usePrevious(props);
@@ -164,12 +173,14 @@ function GraphExplorer(props: GraphExplorerProps) {
             })
             .then(dataset => {
                 const graph = JSON.parse(dataset.Data);
+                const pathItems = dataset.Ref.Path.split('/');
+                const title = pathItems[pathItems.length-1];
                 setState({...state,
-                    ...state,
                     showOpenGraphModal: false,
                     currentDatasetRef: dataset.Ref,
                     graphDataInput: dataset.Data,
                     graphData: {
+                        title: title,
                         nodes: graph.nodes,
                         links: graph.links,
                         timestamp: new Date(),
@@ -451,6 +462,7 @@ function GraphExplorer(props: GraphExplorerProps) {
           setState({...state,
               showUploadGraphDataModal: false,
               graphData: {
+                title: "",
                 nodes: graph.nodes,
                 links: graph.links,
                 timestamp: new Date(),
@@ -572,10 +584,8 @@ function GraphExplorer(props: GraphExplorerProps) {
     }  
 
     function renderDatasetTitle() {
-        if (state.currentDatasetRef) {
-            const pathItems = state.currentDatasetRef.Path.split('/');
-            const name = pathItems[pathItems.length-1]
-            return <span id="graph-explorer-dataset-title">| {name}</span>;
+        if (state.graphData.title) {
+            return <span id="graph-explorer-dataset-title">∙ {state.graphData.title}</span>;
         } else {
             return null;
         }

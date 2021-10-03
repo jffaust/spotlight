@@ -1,7 +1,8 @@
 import { Graph } from "../types/Graph";
 
-export function generateLatticeGraph(w: number, h: number): Graph {
+export function generateGridGraph(w: number, h: number): Graph {
     let graph: Graph = {
+      title: `${w}x${h} grid`,
       timestamp: new Date(),
       nodes: [], 
       links: []
@@ -32,6 +33,7 @@ export function generateLatticeGraph(w: number, h: number): Graph {
 
   export function generateCollatzConjectureGraph(start: number): Graph {
     let graph: Graph = {
+      title: `Collatz conjecture steps for starting numbers ${start} and under`,
       timestamp: new Date(),
       nodes: [], 
       links: []
