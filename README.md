@@ -2,6 +2,8 @@
 
 Ad hoc graph visualizations
 
+![demo](./docs/demo.gif)
+
 ## Min requirements
 
 Node v10+
